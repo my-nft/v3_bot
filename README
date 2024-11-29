@@ -1,0 +1,8 @@
+# Prerequisites
+Install the required libraries:
+
+pip install web3 requests
+
+# Replace the placeholders for:
+Ethereum node endpoint (e.g., Infura or Alchemy URL)
+Uniswap V3 pool addresses for the tokens.
