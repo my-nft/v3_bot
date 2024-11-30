@@ -2,18 +2,22 @@ from web3 import Web3
 import time
 
 # Ethereum node endpoint (replace with your own endpoint)
-ETH_NODE_URL = "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+ETH_NODE_URL = "https://sepolia.infura.io/v3/9c7e70b4bf234955945ff87b8149926e"
 web3 = Web3(Web3.HTTPProvider(ETH_NODE_URL))
 
 # Check connection to Ethereum node
 if not web3.isConnected():
     raise ConnectionError("Unable to connect to Ethereum node. Check your endpoint.")
 
+
+# Sepolia position manager: 0x1238536071E1c677A632429e3655c799b22cDA52
+# Sepolia factory contract: 0x0227628f3F023bb0B980b67D528571c95c6DaC1c
+
 # Uniswap V3 pool addresses (replace with actual pool addresses)
 UNISWAP_POOLS = {
-    "Token1-Token2": "0xYourPoolAddress1",
-    "Token3-Token4": "0xYourPoolAddress2",
-    "Token5-Token6": "0xYourPoolAddress3"
+    "UNI-WETH": "0x287B0e934ed0439E2a7b1d5F0FC25eA2c24b64f7", # UNI-WETH
+    "USDC-WETH": "0xaB9C1409490dCf0B9177dF840D96Da5653F5c5cF", # USDC-WETH
+    "MTK-WETH": "0x836860FB729EC534E8777C61F4c48655E9fD0541" # MTK-WETH
 }
 
 # ABI for Uniswap V3 pool (minimal required for fetching prices)
