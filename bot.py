@@ -1,12 +1,13 @@
 from web3 import Web3
 import time
+from datetime import datetime
 
 # Ethereum node endpoint
 ETH_NODE_URL = "https://optimism-mainnet.infura.io/v3/b6271a54103e430fbc6d2ec56ff98755"
 web3 = Web3(Web3.HTTPProvider(ETH_NODE_URL))
 
 # Check connection to Ethereum node
-if not web3.isConnected():
+if not web3.is_connected():
     raise ConnectionError("Unable to connect to Ethereum node. Check your endpoint.")
 
 # Uniswap V3 pool addresses
@@ -75,7 +76,7 @@ def get_token_decimals(token_address):
     if token_address in DECIMALS_CACHE:
         return DECIMALS_CACHE[token_address]
     try:
-        token_contract = web3.eth.contract(address=web3.toChecksumAddress(token_address), abi=ERC20_ABI)
+        token_contract = web3.eth.contract(address=web3.to_checksum_address(token_address), abi=ERC20_ABI)
         decimals = token_contract.functions.decimals().call()
         DECIMALS_CACHE[token_address] = decimals
         return decimals
@@ -88,7 +89,7 @@ def get_token_symbol(token_address):
     if token_address in SYMBOLS_CACHE:
         return SYMBOLS_CACHE[token_address]
     try:
-        token_contract = web3.eth.contract(address=web3.toChecksumAddress(token_address), abi=ERC20_ABI)
+        token_contract = web3.eth.contract(address=web3.to_checksum_address(token_address), abi=ERC20_ABI)
         symbol = token_contract.functions.symbol().call()
         SYMBOLS_CACHE[token_address] = symbol
         return symbol
@@ -99,7 +100,7 @@ def get_token_symbol(token_address):
 def fetch_price(pool_address):
     """Fetch the real-time price adjusted for token decimals."""
     try:
-        pool_contract = web3.eth.contract(address=web3.toChecksumAddress(pool_address), abi=UNISWAP_POOL_ABI)
+        pool_contract = web3.eth.contract(address=web3.to_checksum_address(pool_address), abi=UNISWAP_POOL_ABI)
         
         # Fetch token0 and token1 addresses
         token0_address = pool_contract.functions.token0().call()
@@ -140,7 +141,13 @@ def fetch_price(pool_address):
 def main():
     print("Starting real-time Uniswap V3 price fetcher...")
     while True:
-        print(f"Fetching prices at block {web3.eth.blockNumber}...")
+        # Fetch block information
+        block_number = web3.eth.block_number
+        block = web3.eth.get_block(block_number)
+        block_timestamp_epoch = block.timestamp
+        block_timestamp_human = datetime.utcfromtimestamp(block_timestamp_epoch).strftime('%Y-%m-%d %H:%M:%S')
+
+        print(f"Fetching prices at block {block_number} (Epoch: {block_timestamp_epoch}, Human: {block_timestamp_human})...")
         for pair, pool_address in UNISWAP_POOLS.items():
             data = fetch_price(pool_address)
             if data:
