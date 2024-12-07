@@ -120,6 +120,8 @@ def fetch_price(pool_address):
         # Adjust for token decimals
         adjusted_price = price * (10 ** token0_decimals) / (10 ** token1_decimals)
 
+        adjusted_price = 1 / adjusted_price
+
         # Fetch token symbols
         token0_symbol = get_token_symbol(token0_address)
         token1_symbol = get_token_symbol(token1_address)
