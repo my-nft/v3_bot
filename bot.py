@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 
 # Ethereum node endpoint
-ETH_NODE_URL = "https://optimism-mainnet.infura.io/v3/b6271a54103e430fbc6d2ec56ff98755"
+ETH_NODE_URL = "https://sepolia.infura.io/v3/b6271a54103e430fbc6d2ec56ff98755"
 web3 = Web3(Web3.HTTPProvider(ETH_NODE_URL))
 
 # Check connection to Ethereum node
@@ -12,7 +12,7 @@ if not web3.is_connected():
 
 # Uniswap V3 pool addresses
 UNISWAP_POOLS = {
-    "USDC-WETH": "0x478946BcD4a5a22b316470F5486fAfb928C0bA25"
+    "USDC-WETH":"0x3289680dD4d6C10bb19b899729cda5eEF58AEfF1"
 }
 
 # ABI for Uniswap V3 pool
@@ -120,8 +120,6 @@ def fetch_price(pool_address):
 
         # Adjust for token decimals
         adjusted_price = price * (10 ** token0_decimals) / (10 ** token1_decimals)
-
-        adjusted_price = 1 / adjusted_price
 
         # Fetch token symbols
         token0_symbol = get_token_symbol(token0_address)
