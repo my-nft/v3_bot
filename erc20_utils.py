@@ -55,7 +55,6 @@ def approve_single_token(spender_address, token_address, amount, nonce_offset=0)
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        print(f"Approval transaction sent for token. Transaction hash: {tx_hash.hex()}")
     except Exception as e:
         print(f"Error approving token {token_address}: {e}")
 

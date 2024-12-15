@@ -9,15 +9,6 @@ from uni_math import *
 
 liquidity_positions = []
 
-BALANCE_PERC = 100 # USE 1 to add full balance
-
-MAX_INT = 1000000000000000000000000000000000
-
-# Global variable to track initial liquidity addition
-initial_liquidity_added = False
-
-deadline = 3000
-
 # Function to manage liquidity
 def manage_liquidity(pool_address):
     pool_contract = web3.eth.contract(address=Web3.to_checksum_address(pool_address), abi=UNISWAP_POOL_ABI)
@@ -58,7 +49,6 @@ def manage_liquidity(pool_address):
 
             # Get the total number of NFTs held by the wallet
             nft_count = position_manager.functions.balanceOf(wallet_address).call()
-            print(f"Wallet holds {nft_count} NFT positions.")
 
             for i in range(nft_count):
                 # Get the token ID of the NFT
@@ -74,7 +64,6 @@ def manage_liquidity(pool_address):
                     print(f"NFT {token_id} is in range. No action needed.")
                     all_out_of_range = False
                 else:
-                    print(f"NFT {token_id} is out of range. Removing liquidity...")
                     remove_liquidity(token_id)
 
             # If all NFTs are out of range, add new liquidity
@@ -114,8 +103,6 @@ def remove_liquidity(token_id):
         position = position_manager.functions.positions(token_id).call()
         liquidity = position[7]  # Index 7 corresponds to liquidity in the `positions` output
 
-        print(f"Token ID: {token_id}, Current Liquidity: {liquidity}")
-
         if liquidity == 0:
             return
 
@@ -140,7 +127,6 @@ def remove_liquidity(token_id):
 
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-        print(f"Remove liquidity transaction confirmed. Receipt: {receipt}")
 
         # Collect tokens
         collect_tokens(token_id)
