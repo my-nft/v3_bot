@@ -1,5 +1,3 @@
-# from web3 import Web3
-from datetime import datetime
 import time
 from config import *
 from erc20_utils import *
@@ -7,7 +5,53 @@ from abis import *
 
 from uni_math import *
 
+
+from telegram import Bot
+import logging
+
+from telegram import Update
+
+
+# Initialize the Telegram bot
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
+
 liquidity_positions = []
+
+
+# Build the application
+# app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+
+from telegram import Bot
+
+import requests
+
+def send_telegram_message_synchronously(message):
+    """
+    Send a message to the Telegram chat synchronously using the HTTP API.
+    
+    :param message: The message to send.
+    """
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message,
+        }
+        response = requests.post(url, json=payload)
+        response.raise_for_status()  # Raise an error for HTTP errors
+        print(f"Telegram notification sent: {message}")
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
+
+def notify_liquidity_action(action, details):
+    """
+    Notify about liquidity actions using Telegram.
+
+    :param action: The type of action (e.g., "Added", "Removed").
+    :param details: Details of the action.
+    """
+    message = f"Liquidity {action}:\n{details}"
+    send_telegram_message_synchronously(message)
 
 # Function to manage liquidity
 def manage_liquidity(pool_address):
@@ -128,6 +172,12 @@ def remove_liquidity(token_id):
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
+        try:
+            notify_liquidity_action("Removed", f"Token ID: {token_id}, liquidity: {liquidity}")
+        except Exception as e:
+            logging.error(f"Error adding liquidity: {e}")
+            notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
+
         # Collect tokens
         collect_tokens(token_id)
 
@@ -161,9 +211,6 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
                                              abi=POSITION_MANAGER_ABI)
         pool_contract = web3.eth.contract(address=Web3.to_checksum_address(pool_address), 
                                           abi=UNISWAP_POOL_ABI)
-        # Fetch current sqrtPriceX96
-        slot0 = pool_contract.functions.slot0().call()
-
         token0_decimals = get_token_decimals(token0_address)
         token1_decimals = get_token_decimals(token1_address)
         
@@ -215,8 +262,15 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
         logs = receipt['logs']
 
+        token_id = extract_token_id_from_transfer_event(logs)
+        try:
+            notify_liquidity_action("Added", f"Token ID: {token_id}, Amount0: {token0_amount}, Amount1: {token1_amount}")
+        except Exception as e:
+            logging.error(f"Error adding liquidity: {e}")
+            notify_liquidity_action("Failed to Add", f"Error: {str(e)}")
     except Exception as e:
         print(f"Error adding liquidity: {e}")
+        
 
 def extract_token_id_from_transfer_event(logs):
     """
@@ -285,16 +339,27 @@ def collect_tokens(token_id):
 
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-        print(f"Collect transaction confirmed in block: {receipt['blockNumber']}")
+
+        try:
+            notify_liquidity_action("Collected", f"Token ID: {token_id}")
+        except Exception as e:
+            logging.error(f"Error adding liquidity: {e}")
+            notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
 
     except Exception as e:
         print(f"Error collecting tokens for token ID {token_id}: {e}")
+
+async def start(update: Update, context):
+    chat_id = update.effective_chat.id
+    print(f"Chat ID: {chat_id}")
+    await context.bot.send_message(chat_id=chat_id, text=f"Your Chat ID is: {chat_id}")
 
 
 def main():
     print("Starting liquidity management bot...")
     for pool_name, pool_address in UNISWAP_POOLS.items():
         print(f"Monitoring pool: {pool_name}")
+        notify_liquidity_action("Removed", f"Token ID: , liquidity:")
 
         manage_liquidity(pool_address)
 

@@ -1,9 +1,6 @@
 from web3 import Web3
 from abis import *
 from config import *
-# ETH_NODE_URL = "https://sepolia.infura.io/v3/b6271a54103e430fbc6d2ec56ff98755"
-# web3 = Web3(Web3.HTTPProvider(ETH_NODE_URL))
-
 
 # Function to fetch balances
 def get_token_balance(token_address, wallet_address):

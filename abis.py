@@ -1,4 +1,3 @@
-# from position_manager_abi import *
 
 # ABI for Uniswap V3 pool
 UNISWAP_POOL_ABI = UNISWAP_POOL_ABI = [

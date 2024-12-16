@@ -14,6 +14,9 @@ BALANCE_PERC = 100 # USE 1 to add full balance
 
 MAX_INT = 1000000000000000000000000000000000
 
+TELEGRAM_BOT_TOKEN = ""
+TELEGRAM_CHAT_ID = ""  # Replace with your chat ID
+
 deadline = 3000
 
 # Uniswap V3 pool addresses
