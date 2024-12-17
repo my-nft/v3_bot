@@ -1,104 +1,120 @@
-🦾 Uniswap V3 Liquidity Management Bot
+
+# 🦾 **Uniswap V3 Liquidity Management Bot**
+
 This is a Python bot designed to manage liquidity positions on Uniswap V3 pools. It also sends notifications using Telegram to keep you informed about liquidity actions.
 
-🚀 Features
-Monitors Uniswap V3 liquidity positions.
-Adds and removes liquidity dynamically based on current price ticks.
-Collects earned fees from liquidity positions.
-Sends Telegram notifications for liquidity events.
+---
 
-📋 Prerequisites
+## 🚀 **Features**
+
+- Monitors Uniswap V3 liquidity positions.
+- Dynamically adds and removes liquidity based on current price ticks.
+- Collects earned fees from liquidity positions.
+- Sends Telegram notifications for liquidity events.
+
+---
+
+## 📋 **Prerequisites**
+
 Ensure you have the following installed:
 
-Python 3.9+ (Check version: python3 --version)
-pip (Python package manager)
-Web3 Connection: Infura or any Ethereum RPC provider.
+1. **Python 3.9+** (Check version: `python3 --version`)
+2. **pip** (Python package manager)
+3. **Web3 Connection**: Infura or any Ethereum RPC provider.
 
-🛠️ Installation
-Clone the repository
+---
 
-bash
-Copy code
+## 🛠️ **Installation**
+
+### 1. **Clone the repository**
+```bash
 git clone https://github.com/my-nft/v3_bot.git
-cd v3_bot
-Create a virtual environment (recommended):
+cd v3-bot
+```
 
-bash
-Copy code
+### 2. **Create a virtual environment** (recommended):
+```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-Install required dependencies: Run the following command to install all necessary Python packages:
+```
 
-bash
-Copy code
+### 3. **Install required dependencies**
+Run the following command to install all necessary Python packages:
+```bash
 pip install -r requirements.txt
-requirements.txt (Create this file if missing):
+```
 
-makefile
-Copy code
+**`requirements.txt`** (Create this file if missing):
+```plaintext
 web3==6.0.0
 python-telegram-bot==20.3
 requests==2.28.2
+```
 
-🔧 Configuration
-You need to set up your credentials and parameters in the config.py file:
+---
 
-Ethereum Node URL
-Replace ETH_NODE_URL with your Ethereum node provider (e.g., Infura, Alchemy).
+## 🔧 **Configuration**
 
-python
-Copy code
+You need to set up your credentials and parameters in the `config.py` file:
+
+### 1. **Ethereum Node URL**
+Replace `ETH_NODE_URL` with your Ethereum node provider (e.g., Infura, Alchemy):
+```python
 ETH_NODE_URL = "https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID"
-Wallet Private Key
+```
+
+### 2. **Wallet Private Key**
 Add your wallet private key for signing transactions:
-
-python
-Copy code
+```python
 PRIVATE_KEY = "YOUR_PRIVATE_KEY"
-⚠️ Security Note: Never hardcode sensitive keys in production. Use environment variables or a secrets manager.
+```
+> ⚠️ **Security Note:** Never hardcode sensitive keys in production. Use environment variables or a secrets manager.
 
-Telegram Bot
-Create a bot on Telegram using BotFather and add the token/chat ID:
-
-python
-Copy code
+### 3. **Telegram Bot**
+Create a bot on Telegram using [BotFather](https://core.telegram.org/bots#botfather) and add the token/chat ID:
+```python
 TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
-How to get the Telegram Chat ID:
+```
 
-Start a chat with your bot and send /start.
-Use this API to get updates:
-bash
-Copy code
-curl -s "https://api.telegram.org/botYOUR_BOT_TOKEN/getUpdates"
-Look for chat_id in the response JSON.
-Other Configurations
+**How to get the Telegram Chat ID**:
+- Start a chat with your bot and send `/start`.
+- Use this API to get updates:
+  ```bash
+  curl -s "https://api.telegram.org/botYOUR_BOT_TOKEN/getUpdates"
+  ```
+- Look for `chat_id` in the response JSON.
+
+### 4. **Other Configurations**
 Define your Uniswap pools and parameters:
-
-python
-Copy code
+```python
 UNISWAP_POOLS = {
-    "USDC-WETH": "YOUR_V3_POOL_ADDRESS"
+    "USDC-WETH": "V3_POOL_ADDRESS"
 }
 BALANCE_PERC = 100  # Use 1 to add full balance
 deadline = 3000     # Time for mint/remove/collect calls
+```
 
-▶️ Running the Bot
-Activate the virtual environment:
+---
 
-bash
-Copy code
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-Run the bot:
+## ▶️ **Running the Bot**
 
-bash
-Copy code
-python3 bot.py
-✅ Testing the Telegram Notifications
+1. **Activate the virtual environment**:
+   ```bash
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Run the bot**:
+   ```bash
+   python3 bot.py
+   ```
+
+---
+
+## ✅ **Testing the Telegram Notifications**
+
 Before running the full bot, test your Telegram notifications:
-
-python
-Copy code
+```python
 from telegram import Bot
 
 TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN"
@@ -107,9 +123,13 @@ TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 bot.send_message(chat_id=TELEGRAM_CHAT_ID, text="Test notification from the bot!")
 print("Test message sent.")
-📂 Project Structure
-bash
-Copy code
+```
+
+---
+
+## 📂 **Project Structure**
+
+```bash
 liquidity-bot/
 │
 ├── bot.py            # Main bot logic
@@ -119,19 +139,32 @@ liquidity-bot/
 ├── uni_math.py       # Uniswap math utilities
 ├── requirements.txt  # Required Python packages
 └── README.md         # Project documentation
+```
 
-🛡️ Security Notes
-Do not share your private key publicly.
-Use a secrets manager or .env file for secure credentials.
-Always monitor your bot's activities, especially for transactions involving funds.
+---
 
-🎯 Future Improvements
-Enhanced error handling and retries for failed transactions.
-Dynamic gas optimization for transactions.
-Multi-pool monitoring support.
-Swap to adjust balances to tick. 
+## 🛡️ **Security Notes**
 
-📝 License
+- **Do not share your private key** publicly.
+- Always monitor your bot's activities, especially for transactions involving funds.
+
+---
+
+## 🎯 **Future Improvements**
+
+- Enhanced error handling and retries for failed transactions.
+- Dynamic gas optimization for transactions.
+- Multi-pool monitoring support.
+- Swap to optimize balances for tick 
+- Smart contract to aggregate transactions.
+
+---
+
+## 📝 **License**
+
 This project is licensed under the xxx License.
 
-Happy Liquidity Management! 🎉
+---
+
+**Happy Liquidity Management! 🎉**
+
