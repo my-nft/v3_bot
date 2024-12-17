@@ -18,11 +18,6 @@ bot = Bot(token=TELEGRAM_BOT_TOKEN)
 liquidity_positions = []
 
 
-# Build the application
-# app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
-
-from telegram import Bot
-
 import requests
 
 def send_telegram_message_synchronously(message):
@@ -172,11 +167,11 @@ def remove_liquidity(token_id):
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
-        try:
-            notify_liquidity_action("Removed", f"Token ID: {token_id}, liquidity: {liquidity}")
-        except Exception as e:
-            logging.error(f"Error adding liquidity: {e}")
-            notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
+        # try:
+        #     notify_liquidity_action("Removed", f"Token ID: {token_id}, liquidity: {liquidity}")
+        # except Exception as e:
+        #     logging.error(f"Error adding liquidity: {e}")
+        #     notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
 
         # Collect tokens
         collect_tokens(token_id)
@@ -263,11 +258,11 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
         logs = receipt['logs']
 
         token_id = extract_token_id_from_transfer_event(logs)
-        try:
-            notify_liquidity_action("Added", f"Token ID: {token_id}, Amount0: {token0_amount}, Amount1: {token1_amount}")
-        except Exception as e:
-            logging.error(f"Error adding liquidity: {e}")
-            notify_liquidity_action("Failed to Add", f"Error: {str(e)}")
+        # try:
+        #     notify_liquidity_action("Added", f"Token ID: {token_id}, Amount0: {token0_amount}, Amount1: {token1_amount}")
+        # except Exception as e:
+        #     logging.error(f"Error adding liquidity: {e}")
+        #     notify_liquidity_action("Failed to Add", f"Error: {str(e)}")
     except Exception as e:
         print(f"Error adding liquidity: {e}")
         
@@ -340,11 +335,11 @@ def collect_tokens(token_id):
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
-        try:
-            notify_liquidity_action("Collected", f"Token ID: {token_id}")
-        except Exception as e:
-            logging.error(f"Error adding liquidity: {e}")
-            notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
+        # try:
+        #     notify_liquidity_action("Collected", f"Token ID: {token_id}")
+        # except Exception as e:
+        #     logging.error(f"Error adding liquidity: {e}")
+        #     notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
 
     except Exception as e:
         print(f"Error collecting tokens for token ID {token_id}: {e}")
@@ -359,7 +354,6 @@ def main():
     print("Starting liquidity management bot...")
     for pool_name, pool_address in UNISWAP_POOLS.items():
         print(f"Monitoring pool: {pool_name}")
-        notify_liquidity_action("Removed", f"Token ID: , liquidity:")
 
         manage_liquidity(pool_address)
 
