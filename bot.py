@@ -344,10 +344,10 @@ def collect_tokens(token_id):
     except Exception as e:
         print(f"Error collecting tokens for token ID {token_id}: {e}")
 
-async def start(update: Update, context):
-    chat_id = update.effective_chat.id
-    print(f"Chat ID: {chat_id}")
-    await context.bot.send_message(chat_id=chat_id, text=f"Your Chat ID is: {chat_id}")
+# async def start(update: Update, context):
+#     chat_id = update.effective_chat.id
+#     print(f"Chat ID: {chat_id}")
+#     await context.bot.send_message(chat_id=chat_id, text=f"Your Chat ID is: {chat_id}")
 
 
 def main():
