@@ -6,47 +6,47 @@ from abis import *
 from uni_math import *
 
 
-from telegram import Bot
+# from telegram import Bot
 import logging
 
-from telegram import Update
+# from telegram import Update
 
 
 # Initialize the Telegram bot
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
+# bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
 liquidity_positions = []
 
 
 import requests
 
-def send_telegram_message_synchronously(message):
-    """
-    Send a message to the Telegram chat synchronously using the HTTP API.
+# def send_telegram_message_synchronously(message):
+#     """
+#     Send a message to the Telegram chat synchronously using the HTTP API.
     
-    :param message: The message to send.
-    """
-    try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message,
-        }
-        response = requests.post(url, json=payload)
-        response.raise_for_status()  # Raise an error for HTTP errors
-        print(f"Telegram notification sent: {message}")
-    except Exception as e:
-        print(f"Error sending Telegram message: {e}")
+#     :param message: The message to send.
+#     """
+#     try:
+#         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+#         payload = {
+#             "chat_id": TELEGRAM_CHAT_ID,
+#             "text": message,
+#         }
+#         response = requests.post(url, json=payload)
+#         response.raise_for_status()  # Raise an error for HTTP errors
+#         print(f"Telegram notification sent: {message}")
+#     except Exception as e:
+#         print(f"Error sending Telegram message: {e}")
 
-def notify_liquidity_action(action, details):
-    """
-    Notify about liquidity actions using Telegram.
+# def notify_liquidity_action(action, details):
+#     """
+#     Notify about liquidity actions using Telegram.
 
-    :param action: The type of action (e.g., "Added", "Removed").
-    :param details: Details of the action.
-    """
-    message = f"Liquidity {action}:\n{details}"
-    send_telegram_message_synchronously(message)
+#     :param action: The type of action (e.g., "Added", "Removed").
+#     :param details: Details of the action.
+#     """
+#     message = f"Liquidity {action}:\n{details}"
+#     send_telegram_message_synchronously(message)
 
 # Function to manage liquidity
 def manage_liquidity(pool_address):
@@ -359,3 +359,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
