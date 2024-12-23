@@ -108,7 +108,7 @@ def manage_liquidity(pool_address):
             # If all NFTs are out of range, add new liquidity
             if all_out_of_range:
                 print("All positions are out of range. Adding new liquidity...")
-                add_liquidity_call(pool_address, token0_address, token1_address, lower_tick, upper_tick, token0_balance, token1_balance)
+                add_liquidity_call(pool_address, token0_address, token1_address, lower_tick, upper_tick, token0_balance, token1_balance, tick_spacing)
 
             time.sleep(5)  # Adjust as necessary
         except Exception as e:
@@ -189,7 +189,7 @@ def get_pool_fee(pool_address):
         return None
 
 # Function to add liquidity
-def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick, upper_tick, token0_balance, token1_balance):
+def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick, upper_tick, token0_balance, token1_balance, tick_spacing):
     """
     Add liquidity for the specified range and store the resulting token ID.
 
@@ -226,13 +226,23 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
                        token1_address, 
                        int(token0_amount), 
                        int(token1_amount))
+        
+        print("token0_address: ", token0_address)
+        print("token1_address: ", token1_address)
+        # print("fee: ", pool_fee)
+        print("tickLower: ", lower_tick)
+        print("tickUpper: ", upper_tick)
+        print("amount0Desired: ", int(token0_amount))
+        print("amount1Desired: ", int(token1_amount))
+        print("tickUpper: ", upper_tick)
 
         pool_fee = get_pool_fee(pool_address)
         # Build transaction to add liquidity
         tx = position_manager.functions.mint({
             "token0": token0_address,
             "token1": token1_address,
-            "fee": pool_fee,  # Replace with the pool fee tier
+            # "fee": pool_fee,  # Replace with the pool fee tier
+            "tickSpacing": tick_spacing,
             "tickLower": lower_tick,
             "tickUpper": upper_tick,
             "amount0Desired": int(token0_amount),
@@ -240,7 +250,8 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
             "amount0Min": 0,
             "amount1Min": 0,
             "recipient": WALLET_ADDRESS,
-            "deadline": int(time.time()) + deadline  # Set a 5-minute deadline
+            "deadline": int(time.time()) + deadline,  # Set a 5-minute deadline
+            "sqrtPriceX96": 0
         }).build_transaction({
             "from": WALLET_ADDRESS,
             "gas": 600000,
