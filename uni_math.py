@@ -106,9 +106,6 @@ def get_token0_amount(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity):
     :return: Amount of token0.
     """
     try:
-        print("args sqrt_ratio_a_x96: ", sqrt_ratio_a_x96)
-        print("args sqrt_ratio_b_x96: ", sqrt_ratio_b_x96)
-        print("args liquidity: ", liquidity)
 
         # Ensure sqrt_ratio_a_x96 is the smaller value
         if sqrt_ratio_a_x96 > sqrt_ratio_b_x96:
@@ -121,9 +118,6 @@ def get_token0_amount(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity):
         numerator1 = liquidity * (sqrt_ratio_b_x96 - sqrt_ratio_a_x96)
         numerator2 = sqrt_ratio_b_x96
 
-        print("numerator1: ", numerator1)
-        print("numerator2: ", numerator2)
-
         # Ensure sqrt_ratio_a_x96 is non-zero to avoid division by zero
         if sqrt_ratio_a_x96 == 0:
             raise ValueError("sqrt_ratio_a_x96 must be greater than 0 to avoid division by zero.")
@@ -131,7 +125,6 @@ def get_token0_amount(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity):
         # Perform the calculation using Python's integer arithmetic
         amount0 = (numerator1 * fixed_point_resolution) // (numerator2 * sqrt_ratio_a_x96)
 
-        print("amount0: ", amount0)
         return amount0
     except Exception as e:
         print(f"Error calculating token0 amount: {e}")
@@ -232,11 +225,6 @@ def compute_amounts_and_liquidity(pool_contract, token0_balance, token1_balance,
             token1_balance * FIXED_POINT_96_Q96
         ) // (sqrt_ratio_b_x96 - sqrt_ratio_a_x96)
 
-        # Calculate possible liquidity for token0 and token1
-
-        print("liquidity_from_token0: ", liquidity_from_token0)
-        print("liquidity_from_token1: ", liquidity_from_token1)
-
         # Determine the maximum liquidity that can be added
         max_liquidity = min(liquidity_from_token0, liquidity_from_token1)
         
@@ -247,7 +235,7 @@ def compute_amounts_and_liquidity(pool_contract, token0_balance, token1_balance,
 
             # Adjusted token1 amount
             adjusted_token1_scaled = get_token1_amount(sqrt_ratio_a_x96, sqrt_ratio_b_x96, max_liquidity)
-            print(f"adjusted_token0_scaled: {adjusted_token0_scaled} | adjusted_token1_scaled: {adjusted_token1_scaled}")
+         
             # Scale adjusted amounts back to original token decimals
             adjusted_token0 = adjusted_token0_scaled # // (10 ** (18 - token0_decimals))
             adjusted_token1 = adjusted_token1_scaled # // (10 ** (18 - token1_decimals))

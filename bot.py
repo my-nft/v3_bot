@@ -71,7 +71,10 @@ def manage_liquidity(pool_address):
             token0_balance = token0_balance / BALANCE_PERC
             token1_balance = token1_balance / BALANCE_PERC
 
-            print(f"Current Tick: {current_tick} | Token0 Balance to be used: {token0_balance} | Token1 Balance to be used: {token1_balance}")
+            decimals0 = get_token_decimals(token0_address)
+            decimals1 = get_token_decimals(token1_address)
+
+            print(f"Current Tick: {current_tick} | Token0 Balance to be used: {token0_balance/(10**decimals0)} | Token1 Balance to be used: {token1_balance/(10**decimals1)}")
 
             # Calculate ticks based on current tick and tick spacing
             lower_tick, upper_tick = calculate_ticks(current_tick, tick_spacing, TICKS_DOWN, TICKS_UP)
@@ -226,15 +229,9 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
                        token1_address, 
                        int(token0_amount), 
                        int(token1_amount))
-        
-        print("token0_address: ", token0_address)
-        print("token1_address: ", token1_address)
-        # print("fee: ", pool_fee)
-        print("tickLower: ", lower_tick)
-        print("tickUpper: ", upper_tick)
-        print("amount0Desired: ", int(token0_amount))
-        print("amount1Desired: ", int(token1_amount))
-        print("tickUpper: ", upper_tick)
+
+        print("amount0Desired: ", int(token0_amount)/(10**token0_decimals))
+        print("amount1Desired: ", int(token1_amount)/(10**token1_decimals))
 
         pool_fee = get_pool_fee(pool_address)
         # Build transaction to add liquidity
@@ -315,11 +312,6 @@ def collect_tokens(token_id):
     try:
         # Create a contract instance for the Position Manager
         position_manager = web3.eth.contract(address=POSITION_MANAGER_ADDRESS, abi=POSITION_MANAGER_ABI)
-
-        print("token_id: ", token_id)
-        print("recipient: ", Web3.to_checksum_address(WALLET_ADDRESS))
-        print("amount0Max: ", MAX_INT)
-        print("amount1Max: ", MAX_INT)
 
         temp_list = [
             int(token_id), 
