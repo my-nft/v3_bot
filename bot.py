@@ -158,7 +158,7 @@ def remove_liquidity(token_id):
         }).build_transaction({
             "from": WALLET_ADDRESS,
             "gas": 300000,  # Adjust gas limit as needed
-            "gasPrice":2*web3.eth.gas_price, # web3.toWei(5, "gwei"),  # Static gas price for predictable fees
+            "gasPrice":20*web3.eth.gas_price, # web3.toWei(5, "gwei"),  # Static gas price for predictable fees
             "nonce": web3.eth.get_transaction_count(WALLET_ADDRESS),
         })
 
@@ -252,7 +252,7 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
         }).build_transaction({
             "from": WALLET_ADDRESS,
             "gas": 600000,
-            "gasPrice": 2*web3.eth.gas_price, # Web3.to_wei(5, 'gwei'),
+            "gasPrice": 20*web3.eth.gas_price, # Web3.to_wei(5, 'gwei'),
             "nonce": web3.eth.get_transaction_count(WALLET_ADDRESS)+2,
         })
 
@@ -325,7 +325,7 @@ def collect_tokens(token_id):
         tx = position_manager.functions.collect(collect_params).build_transaction({
             "from": Web3.to_checksum_address(WALLET_ADDRESS),
             "gas": 200000,  # Adjust as needed
-            "gasPrice": 2 * web3.eth.gas_price,
+            "gasPrice": 20 * web3.eth.gas_price,
             "nonce": web3.eth.get_transaction_count(Web3.to_checksum_address(WALLET_ADDRESS)),
         })
 
