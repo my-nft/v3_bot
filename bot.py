@@ -123,7 +123,7 @@ def manage_liquidity(pool_address):
                 print("All positions are out of range. Adding new liquidity...")
                 add_liquidity_call(pool_address, token0_address, token1_address, lower_tick, upper_tick, token0_balance, token1_balance, tick_spacing)
 
-            time.sleep(5)  # Adjust as necessary
+            time.sleep(300)  # Adjust as necessary
         except Exception as e:
             print(f"Error in manage_liquidity loop: {e}")
             time.sleep(10)  # Add delay to prevent spamming in case of errors
