@@ -2,6 +2,8 @@ import time
 from config import *
 from erc20_utils import *
 from abis import *
+import math
+
 
 from uni_math import *
 
@@ -74,7 +76,15 @@ def manage_liquidity(pool_address):
             decimals0 = get_token_decimals(token0_address)
             decimals1 = get_token_decimals(token1_address)
 
+            # Adjust for decimals in price calculation
+            decimal_adjustment = 10 ** (decimals1 - decimals0)
+
+            # Calculate price with adjustment for decimals
+            price_token1_in_token0 = math.pow(1.0001, current_tick) / decimal_adjustment
+            price_token0_in_token1 = decimal_adjustment / math.pow(1.0001, current_tick)
+
             print(f"Current Tick: {current_tick} | Token0 Balance to be used: {token0_balance/(10**decimals0)} | Token1 Balance to be used: {token1_balance/(10**decimals1)}")
+            print(f"Price (Token1 in Token0): {price_token1_in_token0:.6f} | Price (Token0 in Token1): {price_token0_in_token1:.6f}")
 
             # Calculate ticks based on current tick and tick spacing
             lower_tick, upper_tick = calculate_ticks(current_tick, tick_spacing, TICKS_DOWN, TICKS_UP)
