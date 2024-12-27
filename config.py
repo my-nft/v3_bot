@@ -1,4 +1,5 @@
 from web3 import Web3
+import collections
 
 # ETH_NODE_URL = "https://sepolia.infura.io/v3/b6271a54103e430fbc6d2ec56ff98755" # sepolia
 ETH_NODE_URL = "https://optimism-mainnet.infura.io/v3/9c7e70b4bf234955945ff87b8149926e" # optimism mainnet
@@ -19,6 +20,10 @@ MAX_INT = 1000000000000000000000000000000000
 
 TELEGRAM_BOT_TOKEN = "7854276420:AAECy2HwzVW0-Xgi1evj5fc8lGnHjk_L-2c"
 TELEGRAM_CHAT_ID = "498172456"  # Replace with your chat ID
+
+X_PERCENT_THRESHOLD = 20 # Example threshold of 20% for EMA change detection
+ALPHA = 0.1 # Smoothing factor for EMA calculation
+EMA_WINDOW = collections.deque(maxlen=20) # Stores the last 20 liquidity values
 
 deadline = 3000
 

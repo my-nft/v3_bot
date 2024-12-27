@@ -22,50 +22,84 @@ liquidity_positions = []
 
 import requests
 
-# def send_telegram_message_synchronously(message):
-#     """
-#     Send a message to the Telegram chat synchronously using the HTTP API.
+def send_telegram_message_synchronously(message):
+    """
+    Send a message to the Telegram chat synchronously using the HTTP API.
     
-#     :param message: The message to send.
-#     """
-#     try:
-#         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-#         payload = {
-#             "chat_id": TELEGRAM_CHAT_ID,
-#             "text": message,
-#         }
-#         response = requests.post(url, json=payload)
-#         response.raise_for_status()  # Raise an error for HTTP errors
-#         print(f"Telegram notification sent: {message}")
-#     except Exception as e:
-#         print(f"Error sending Telegram message: {e}")
+    :param message: The message to send.
+    """
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message,
+        }
+        response = requests.post(url, json=payload)
+        response.raise_for_status()  # Raise an error for HTTP errors
+        print(f"Telegram notification sent: {message}")
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
 
-# def notify_liquidity_action(action, details):
-#     """
-#     Notify about liquidity actions using Telegram.
+def notify_liquidity_action(action, details):
+    """
+    Notify about liquidity actions using Telegram.
 
-#     :param action: The type of action (e.g., "Added", "Removed").
-#     :param details: Details of the action.
-#     """
-#     message = f"Liquidity {action}:\n{details}"
-#     send_telegram_message_synchronously(message)
+    :param action: The type of action (e.g., "Added", "Removed").
+    :param details: Details of the action.
+    """
+    message = f"Liquidity {action}:\n{details}"
+    send_telegram_message_synchronously(message)
 
 # Function to manage liquidity
+
+
+def calculate_ema(window, alpha):
+    """
+    Function to calculate the Exponential Moving Average (EMA) over a window of values.
+    
+    :param window: A deque containing the last N liquidity values.
+    :param alpha: The smoothing factor (0 < alpha < 1).
+    :return: The updated EMA value.
+    """
+    # Start with the first value in the window as the initial EMA
+    ema = window[0]
+    
+    # Apply the formula to all points in the window
+    for i in range(1, len(window)):
+        ema = alpha * window[i] + (1 - alpha) * ema
+    return ema
+
+
 def manage_liquidity(pool_address):
     pool_contract = web3.eth.contract(address=Web3.to_checksum_address(pool_address), abi=UNISWAP_POOL_ABI)
+    
+    ema_window = EMA_WINDOW  
+    prev_ema = None  # Previous EMA value, starts as None
+    current_ema = None
+    ema_removed = False  # Flag to track if liquidity was removed based on EMA condition
+    alpha = ALPHA  
+    x_percent_threshold = X_PERCENT_THRESHOLD # Example threshold of 5% for EMA change detection
 
     while True:
         try:
-            # Fetch the current tick
+            # Fetch the current tick and liquidity data from the pool
             slot0 = pool_contract.functions.slot0().call()
             current_tick = slot0[1]
-
             tick_spacing = pool_contract.functions.tickSpacing().call()
-            
+
+            # Fetch current liquidity in the pool
+            liquidity = pool_contract.functions.liquidity().call()
+
+            # Add current liquidity to the EMA window
+            ema_window.append(liquidity)
+            current_ema = prev_ema
+            # Calculate the EMA at the start of each iteration, using the entire window
+            prev_ema = calculate_ema(ema_window, alpha)
+
             # Fetch token addresses
             token0_address = pool_contract.functions.token0().call()
             token1_address = pool_contract.functions.token1().call()
-            
+
             # Fetch wallet balances
             token0_balance = get_token_balance(token0_address, WALLET_ADDRESS)
             token1_balance = get_token_balance(token1_address, WALLET_ADDRESS)
@@ -101,7 +135,7 @@ def manage_liquidity(pool_address):
 
             # Get the total number of NFTs held by the wallet
             nft_count = position_manager.functions.balanceOf(wallet_address).call()
-
+            existing_token_id = 0
             for i in range(nft_count):
                 # Get the token ID of the NFT
                 token_id = position_manager.functions.tokenOfOwnerByIndex(wallet_address, i).call()
@@ -113,8 +147,10 @@ def manage_liquidity(pool_address):
 
                 # Check if the NFT's tick range is in range
                 if lower_tick <= nft_lower_tick and upper_tick >= nft_upper_tick:
-                    print(f"NFT {token_id} is in range. No action needed.")
-                    all_out_of_range = False
+                    if ((int)(position[7]) > 0):
+                        print(f"NFT {token_id} is in range. No action needed.")
+                        all_out_of_range = False
+                        existing_token_id = token_id
                 else:
                     remove_liquidity(token_id)
 
@@ -122,12 +158,37 @@ def manage_liquidity(pool_address):
             if all_out_of_range:
                 print("All positions are out of range. Adding new liquidity...")
                 add_liquidity_call(pool_address, token0_address, token1_address, lower_tick, upper_tick, token0_balance, token1_balance, tick_spacing)
+                pass
+            elif (current_ema and prev_ema):
+                ema_change_percentage = ((current_ema - prev_ema) / prev_ema) * 100
 
-            time.sleep(300)  # Adjust as necessary
+                # Calculate the EMA with the existing points in the window
+                # Log the current liquidity and EMA
+                print(f"Current Liquidity : {liquidity} | Current EMA: {prev_ema:.6f}")
+                # Calculate percentage EMA change if previous EMA exists
+                if current_ema is not None:
+                    ema_change_percentage = ((current_ema - prev_ema) / prev_ema) * 100
+                    # Log the EMA Change Percentage
+                    print(f"EMA Change Percentage: {ema_change_percentage:.2f}%")
+
+                # Check for significant EMA change
+                if ema_change_percentage < -x_percent_threshold and not ema_removed:
+                    # If EMA decreases by more than the threshold and liquidity is available, remove liquidity
+                    print("EMA has decreased significantly. Removing liquidity...")
+                    # Remove liquidity using the previous method
+                    remove_liquidity(existing_token_id)
+                    ema_removed = True
+                elif ema_change_percentage > x_percent_threshold and ema_removed:
+                    # If EMA increases by more than the threshold and liquidity was removed earlier, add liquidity back
+                    print("EMA has increased significantly. Adding liquidity back...")
+                    # Add liquidity using the previous method
+                    add_liquidity_call(pool_address, token0_address, token1_address, lower_tick, upper_tick, token0_balance, token1_balance, tick_spacing)
+                    ema_removed = False
+
+            time.sleep(5)  # Adjust as necessary
         except Exception as e:
             print(f"Error in manage_liquidity loop: {e}")
             time.sleep(10)  # Add delay to prevent spamming in case of errors
-
 
 # Placeholder for liquidity out-of-range check
 def liquidity_out_of_range(lower_tick, upper_tick, pool_contract):
@@ -180,11 +241,11 @@ def remove_liquidity(token_id):
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
-        # try:
-        #     notify_liquidity_action("Removed", f"Token ID: {token_id}, liquidity: {liquidity}")
-        # except Exception as e:
-        #     logging.error(f"Error adding liquidity: {e}")
-        #     notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
+        try:
+            notify_liquidity_action("Removed", f"Token ID: {token_id}, liquidity: {liquidity}")
+        except Exception as e:
+            logging.error(f"Error adding liquidity: {e}")
+            notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
 
         # Collect tokens
         collect_tokens(token_id)
@@ -276,11 +337,11 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
         logs = receipt['logs']
 
         token_id = extract_token_id_from_transfer_event(logs)
-        # try:
-        #     notify_liquidity_action("Added", f"Token ID: {token_id}, Amount0: {token0_amount}, Amount1: {token1_amount}")
-        # except Exception as e:
-        #     logging.error(f"Error adding liquidity: {e}")
-        #     notify_liquidity_action("Failed to Add", f"Error: {str(e)}")
+        try:
+            notify_liquidity_action("Added", f"Token ID: {token_id}, Amount0: {token0_amount}, Amount1: {token1_amount}")
+        except Exception as e:
+            logging.error(f"Error adding liquidity: {e}")
+            notify_liquidity_action("Failed to Add", f"Error: {str(e)}")
     except Exception as e:
         print(f"Error adding liquidity: {e}")
         
@@ -348,11 +409,11 @@ def collect_tokens(token_id):
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
-        # try:
-        #     notify_liquidity_action("Collected", f"Token ID: {token_id}")
-        # except Exception as e:
-        #     logging.error(f"Error adding liquidity: {e}")
-        #     notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
+        try:
+            notify_liquidity_action("Collected", f"Token ID: {token_id}")
+        except Exception as e:
+            logging.error(f"Error adding liquidity: {e}")
+            notify_liquidity_action("Failed to Remove", f"Error: {str(e)}")
 
     except Exception as e:
         print(f"Error collecting tokens for token ID {token_id}: {e}")
