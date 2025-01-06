@@ -1,9 +1,6 @@
 from web3 import Web3
 from abis import *
 from config import *
-# ETH_NODE_URL = "https://sepolia.infura.io/v3/b6271a54103e430fbc6d2ec56ff98755"
-# web3 = Web3(Web3.HTTPProvider(ETH_NODE_URL))
-
 
 # Function to fetch balances
 def get_token_balance(token_address, wallet_address):
@@ -50,7 +47,7 @@ def approve_single_token(spender_address, token_address, amount, nonce_offset=0)
         ).build_transaction({
             "from": Web3.to_checksum_address(WALLET_ADDRESS),
             "gas": 100000,
-            "gasPrice": 2*web3.eth.gas_price,
+            "gasPrice": 20*web3.eth.gas_price,
             "nonce": web3.eth.get_transaction_count(Web3.to_checksum_address(WALLET_ADDRESS)) + nonce_offset
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
