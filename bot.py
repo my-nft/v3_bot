@@ -87,14 +87,18 @@ def manage_liquidity(pool_address):
             current_tick = slot0[1]
             tick_spacing = pool_contract.functions.tickSpacing().call()
 
-            # Fetch current liquidity in the pool
-            liquidity = pool_contract.functions.liquidity().call()
+            liquidity = pool_contract.functions.stakedLiquidity().call()
+            print(f"Currentl liquidity in range : {liquidity} ")
 
             # Add current liquidity to the EMA window
             ema_window.append(liquidity)
-            current_ema = prev_ema
+            prev_ema = current_ema
             # Calculate the EMA at the start of each iteration, using the entire window
-            prev_ema = calculate_ema(ema_window, alpha)
+            current_ema = calculate_ema(ema_window, alpha)
+            if prev_ema is not None:
+                ema_change_percentage = ((current_ema - prev_ema) / prev_ema) * 100
+                # Log the EMA Change Percentage
+                print(f"EMA Change Percentage: {ema_change_percentage:.2f}%")
 
             # Fetch token addresses
             token0_address = pool_contract.functions.token0().call()
@@ -117,14 +121,19 @@ def manage_liquidity(pool_address):
             price_token1_in_token0 = math.pow(1.0001, current_tick) / decimal_adjustment
             price_token0_in_token1 = decimal_adjustment / math.pow(1.0001, current_tick)
 
-            print(f"Current Tick: {current_tick} | Token0 Balance to be used: {token0_balance/(10**decimals0)} | Token1 Balance to be used: {token1_balance/(10**decimals1)}")
+            price_current_tick = (math.pow(1.0001, current_tick)) / decimal_adjustment
+
+            print(f"Current Tick: {price_current_tick} | Token0 Balance to be used: {token0_balance/(10**decimals0)} | Token1 Balance to be used: {token1_balance/(10**decimals1)}")
             print(f"Price (Token1 in Token0): {price_token1_in_token0:.6f} | Price (Token0 in Token1): {price_token0_in_token1:.6f}")
 
             # Calculate ticks based on current tick and tick spacing
             lower_tick, upper_tick = calculate_ticks(current_tick, tick_spacing, TICKS_DOWN, TICKS_UP)
 
-            print("Lower tick: ", lower_tick)
-            print("Upper tick: ", upper_tick)
+            price_lower_tick = (math.pow(1.0001, lower_tick)) / decimal_adjustment
+            price_upper_tick = (math.pow(1.0001, upper_tick)) / decimal_adjustment
+
+            print("Lower tick: ", price_lower_tick)
+            print("Upper tick: ", price_upper_tick)
 
             # Track if all NFTs are out of range
             all_out_of_range = True
@@ -189,6 +198,26 @@ def manage_liquidity(pool_address):
         except Exception as e:
             print(f"Error in manage_liquidity loop: {e}")
             time.sleep(10)  # Add delay to prevent spamming in case of errors
+
+# def get_tick_liquidity(pool_contract, current_tick):
+#     """
+#     Fetch tick-specific liquidity using liquidityGross and liquidityNet.
+
+#     :param pool_contract: The Uniswap pool contract instance.
+#     :param current_tick: The current tick to fetch liquidity for.
+#     :return: Total liquidity for the given tick.
+#     """
+#     try:
+#         tick_info = pool_contract.functions.ticks(current_tick).call()
+
+#         liquidity_gross = tick_info[0]  # Total liquidity at this tick
+#         liquidity_net = tick_info[1]    # Net liquidity added/removed at this tick
+
+#         print(f"Liquidity at Tick {current_tick}: Gross={liquidity_gross}, Net={liquidity_net}")
+#         return liquidity_gross  # Return the gross liquidity
+#     except Exception as e:
+#         print(f"Error fetching tick liquidity for tick {current_tick}: {e}")
+#         return 0  # Default to 0 liquidity on failure
 
 # Placeholder for liquidity out-of-range check
 def liquidity_out_of_range(lower_tick, upper_tick, pool_contract):
