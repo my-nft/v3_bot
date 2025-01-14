@@ -367,7 +367,7 @@ def add_liquidity_call(pool_address, token0_address, token1_address, lower_tick,
 
         token_id = extract_token_id_from_transfer_event(logs)
         try:
-            notify_liquidity_action("Added", f"Token ID: {token_id}, Amount0: {token0_amount}, Amount1: {token1_amount}")
+            notify_liquidity_action("Added", f"Token ID: {token_id}, Amount0: {token0_amount}, Amount1: {token1_amount}, Lower tick: {lower_tick}, Upper tick: {upper_tick}")
         except Exception as e:
             logging.error(f"Error adding liquidity: {e}")
             notify_liquidity_action("Failed to Add", f"Error: {str(e)}")
